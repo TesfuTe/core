@@ -1,0 +1,55 @@
+rules:
+  action-setup:
+    status: exempt
+    comment: "No actions are implemented as this is a minimal integration that only sets a state."
+  appropriate-polling:
+    status: exempt
+    comment: "No polling is used; the integration sets a static state once during setup."
+  brands:
+    status: exempt
+    comment: "No brand-specific assets are required for this minimal integration."
+  common-modules:
+    status: exempt
+    comment: "No external modules are used; the integration relies solely on Home Assistant core."
+  config-flow:
+    status: exempt
+    comment: "Uses YAML configuration, not config flow, as per minimal integration design."
+  config-flow-test-coverage:
+    status: exempt
+    comment: "No config flow implemented, so test coverage is not applicable."
+  dependency-transparency:
+    status: exempt
+    comment: "No external dependencies are used in this integration."
+  docs-actions:
+    status: exempt
+    comment: "No actions are implemented, so no action documentation is needed."
+  docs-high-level-description:
+    status: done
+    comment: "README.md provides a high-level description of the integration."
+  docs-installation-instructions:
+    status: done
+    comment: "README.md includes YAML configuration instructions."
+  docs-removal-instructions:
+    status: done
+    comment: "README.md implies removal by deleting the YAML configuration."
+  entity-event-setup:
+    status: exempt
+    comment: "No entities or events are implemented; only a state is set."
+  entity-unique-id:
+    status: exempt
+    comment: "No entities are created, so unique IDs are not applicable."
+  has-entity-name:
+    status: exempt
+    comment: "No entities are created, so entity names are not applicable."
+  runtime-data:
+    status: exempt
+    comment: "No runtime data is needed; the integration sets a static state."
+  test-before-configure:
+    status: exempt
+    comment: "No configuration options exist beyond enabling the integration."
+  test-before-setup:
+    status: exempt
+    comment: "No complex setup requiring tests; state is set directly."
+  unique-config-entry:
+    status: exempt
+    comment: "No config entries are used; setup is via YAML."
