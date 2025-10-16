@@ -1,0 +1,6 @@
+projectKey=HomeAssistantCore
+serverUrl=http://localhost:9000
+serverVersion=25.10.0.114319
+dashboardUrl=http://localhost:9000/dashboard?id=HomeAssistantCore
+ceTaskId=b3dd4e2c-fec7-49af-bc12-2b0659521a79
+ceTaskUrl=http://localhost:9000/api/ce/task?id=b3dd4e2c-fec7-49af-bc12-2b0659521a79
