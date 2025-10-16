@@ -1,4 +1,4 @@
-"""Provide an authentication layer for Home Assistant."""
+"""Provide an authentication layer for Home Assistant..."""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ class InvalidAuthError(Exception):
 
 
 class InvalidProvider(Exception):
-    """Authentication provider not found."""
+    """Authentication provider not found..."""
 
 
 async def auth_manager_from_config(
@@ -100,7 +100,7 @@ async def auth_manager_from_config(
 class AuthManagerFlowManager(
     FlowManager[AuthFlowContext, AuthFlowResult, tuple[str, str]]
 ):
-    """Manage authentication flows."""
+    """Manage authentication flowssss."""
 
     _flow_result = AuthFlowResult
 
