@@ -1199,28 +1199,20 @@ class PipelineRun:
                 intent_filter: Callable[[RecognizeResult], bool] | None = None
                 # If the LLM has API access, we filter out some sentences that are
                 # interfering with LLM operation.
-                if (
-                    intent_agent_state := self.hass.states.get(self.intent_agent.id)
-                ) and intent_agent_state.attributes.get(
-                    ATTR_SUPPORTED_FEATURES, 0
-                ) & conversation.ConversationEntityFeature.CONTROL:
-                    intent_filter = _async_local_fallback_intent_filter
+                intent_filter = self._filter_out_operations(intent_filter)
 
                 # Try local intents
-                if (
-                    intent_response is None
-                    and self.pipeline.prefer_local_intents
-                    and (
-                        intent_response := await conversation.async_handle_intents(
-                            self.hass,
-                            user_input,
-                            intent_filter=intent_filter,
-                        )
-                    )
-                ):
-                    # Local intent matched
-                    agent_id = conversation.HOME_ASSISTANT_AGENT
-                    processed_locally = True
+                (
+                    agent_id,
+                    processed_locally,
+                    intent_response,
+                ) = await self._try_local_intent(
+                    user_input,
+                    intent_response,
+                    intent_filter,
+                    agent_id,
+                    processed_locally,
+                )
 
             tts_input_stream, chat_log_role, delta_character_count = self._set_stream()
 
@@ -1370,6 +1362,42 @@ class PipelineRun:
             self._conversation_data.continue_conversation_agent = agent_id
 
         return speech
+
+    async def _try_local_intent(
+        self,
+        user_input: conversation.models.ConversationInput,
+        intent_response: intent.IntentResponse | None,
+        intent_filter: Callable[[RecognizeResult], bool] | None,
+        agent_id: str,
+        processed_locally: bool,
+    ) -> tuple[str, bool, intent.IntentResponse | None]:
+        if (
+            intent_response is None
+            and self.pipeline.prefer_local_intents
+            and (
+                intent_response := await conversation.async_handle_intents(
+                    self.hass,
+                    user_input,
+                    intent_filter=intent_filter,
+                )
+            )
+        ):
+            # Local intent matched
+            agent_id = conversation.HOME_ASSISTANT_AGENT
+            processed_locally = True
+        return agent_id, processed_locally, intent_response
+
+    def _filter_out_operations(
+        self, intent_filter: Callable[[RecognizeResult], bool] | None
+    ) -> Callable[[RecognizeResult], bool] | None:
+        assert self.intent_agent is not None
+        if (
+            intent_agent_state := self.hass.states.get(self.intent_agent.id)
+        ) and intent_agent_state.attributes.get(
+            ATTR_SUPPORTED_FEATURES, 0
+        ) & conversation.ConversationEntityFeature.CONTROL:
+            intent_filter = _async_local_fallback_intent_filter
+        return intent_filter
 
     def _set_stream(self) -> tuple[asyncio.Queue[str | None] | None, str | None, int]:
         if self.tts_stream and self.tts_stream.supports_streaming_input:
