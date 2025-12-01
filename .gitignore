@@ -144,3 +144,4 @@ pytest_buckets.txt
 
 #Sonarqube log files
 **/.sonar/
+**/sonar-project.properties/
