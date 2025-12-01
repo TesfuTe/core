@@ -16,6 +16,7 @@ from homeassistant.components.todo import (
     DOMAIN as TODO_DOMAIN,
     TodoServices,
 )
+from homeassistant.components.todoist.todo import define_priority_level
 from homeassistant.const import ATTR_ENTITY_ID, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_component import async_update_entity
@@ -91,7 +92,12 @@ async def test_todo_item_state(
             {},
             [make_api_task(id="task-id-1", content="Soda", is_completed=False)],
             {"content": "Soda", "due_string": "no date", "description": ""},
-            {"uid": "task-id-1", "summary": "Soda", "status": "needs_action"},
+            {
+                "uid": "task-id-1",
+                "summary": "Soda",
+                "status": "needs_action",
+                "priority": "Low",
+            },
         ),
         (
             [],
@@ -102,6 +108,7 @@ async def test_todo_item_state(
                     content="Soda",
                     is_completed=False,
                     due=Due(is_recurring=False, date="2023-11-18", string="today"),
+                    priority=1,
                 )
             ],
             {"description": "", "due_date": "2023-11-18"},
@@ -110,6 +117,7 @@ async def test_todo_item_state(
                 "summary": "Soda",
                 "status": "needs_action",
                 "due": "2023-11-18",
+                "priority": "Low",
             },
         ),
         (
@@ -126,6 +134,7 @@ async def test_todo_item_state(
                         datetime="2023-11-18T12:30:00.000000Z",
                         string="today",
                     ),
+                    priority=1,
                 )
             ],
             {
@@ -137,6 +146,7 @@ async def test_todo_item_state(
                 "summary": "Soda",
                 "status": "needs_action",
                 "due": "2023-11-18T06:30:00-06:00",
+                "priority": "Low",
             },
         ),
         (
@@ -148,6 +158,7 @@ async def test_todo_item_state(
                     content="Soda",
                     description="6-pack",
                     is_completed=False,
+                    priority=1,
                 )
             ],
             {"description": "6-pack", "due_string": "no date"},
@@ -156,6 +167,7 @@ async def test_todo_item_state(
                 "summary": "Soda",
                 "status": "needs_action",
                 "description": "6-pack",
+                "priority": "Low",
             },
         ),
     ],
@@ -281,6 +293,7 @@ async def test_update_todo_item_status(
                     content="Soda",
                     is_completed=False,
                     description="desc",
+                    priority=1,  # Added priority field
                 )
             ],
             {ATTR_RENAME: "Milk"},
@@ -290,6 +303,7 @@ async def test_update_todo_item_status(
                     content="Milk",
                     is_completed=False,
                     description="desc",
+                    priority=1,  # Preserve priority field
                 )
             ],
             {
@@ -297,16 +311,22 @@ async def test_update_todo_item_status(
                 "content": "Milk",
                 "description": "desc",
                 "due_string": "no date",
+                # "priority": "Low",                         # Added priority field
             },
             {
                 "uid": "task-id-1",
                 "summary": "Milk",
                 "status": "needs_action",
                 "description": "desc",
+                "priority": "Low",  # Added priority field
             },
         ),
         (
-            [make_api_task(id="task-id-1", content="Soda", is_completed=False)],
+            [
+                make_api_task(
+                    id="task-id-1", content="Soda", is_completed=False, priority=1
+                )
+            ],  # Added priority field
             {ATTR_DUE_DATE: "2023-11-18"},
             [
                 make_api_task(
@@ -314,6 +334,7 @@ async def test_update_todo_item_status(
                     content="Soda",
                     is_completed=False,
                     due=Due(is_recurring=False, date="2023-11-18", string="today"),
+                    priority=1,  # Preserve priority field
                 )
             ],
             {
@@ -327,10 +348,15 @@ async def test_update_todo_item_status(
                 "summary": "Soda",
                 "status": "needs_action",
                 "due": "2023-11-18",
+                "priority": "Low",  # Added priority field
             },
         ),
         (
-            [make_api_task(id="task-id-1", content="Soda", is_completed=False)],
+            [
+                make_api_task(
+                    id="task-id-1", content="Soda", is_completed=False, priority=1
+                )
+            ],
             {ATTR_DUE_DATETIME: "2023-11-18T06:30:00"},
             [
                 make_api_task(
@@ -343,6 +369,7 @@ async def test_update_todo_item_status(
                         datetime="2023-11-18T12:30:00.000000Z",
                         string="today",
                     ),
+                    priority=1,  # Preserve priority field
                 )
             ],
             {
@@ -356,10 +383,15 @@ async def test_update_todo_item_status(
                 "summary": "Soda",
                 "status": "needs_action",
                 "due": "2023-11-18T06:30:00-06:00",
+                "priority": "Low",  # Added priority field
             },
         ),
         (
-            [make_api_task(id="task-id-1", content="Soda", is_completed=False)],
+            [
+                make_api_task(
+                    id="task-id-1", content="Soda", is_completed=False, priority=1
+                )
+            ],
             {ATTR_DESCRIPTION: "6-pack"},
             [
                 make_api_task(
@@ -367,6 +399,7 @@ async def test_update_todo_item_status(
                     content="Soda",
                     description="6-pack",
                     is_completed=False,
+                    priority=1,  # Preserve priority field
                 )
             ],
             {
@@ -380,6 +413,7 @@ async def test_update_todo_item_status(
                 "summary": "Soda",
                 "status": "needs_action",
                 "description": "6-pack",
+                "priority": "Low",  # Added priority field
             },
         ),
         (
@@ -389,6 +423,7 @@ async def test_update_todo_item_status(
                     content="Soda",
                     description="6-pack",
                     is_completed=False,
+                    priority=1,  # Preserve priority field
                 )
             ],
             {ATTR_DESCRIPTION: None},
@@ -398,6 +433,7 @@ async def test_update_todo_item_status(
                     content="Soda",
                     is_completed=False,
                     description="",
+                    priority=1,  # Preserve priority field
                 )
             ],
             {
@@ -410,6 +446,7 @@ async def test_update_todo_item_status(
                 "uid": "task-id-1",
                 "summary": "Soda",
                 "status": "needs_action",
+                "priority": "Low",  # Added priority field
             },
         ),
         (
@@ -422,6 +459,7 @@ async def test_update_todo_item_status(
                     # Create a mock task with a string value in the Due object and verify it
                     # gets preserved when verifying the kwargs to update below
                     due=Due(date="2024-01-01", is_recurring=True, string="every day"),
+                    priority=1,  # Preserve priority field
                 )
             ],
             {ATTR_DUE_DATE: "2024-02-01"},
@@ -432,6 +470,7 @@ async def test_update_todo_item_status(
                     description="6-pack",
                     is_completed=False,
                     due=Due(date="2024-02-01", is_recurring=True, string="every day"),
+                    priority=1,  # Preserve priority field
                 )
             ],
             {
@@ -447,6 +486,7 @@ async def test_update_todo_item_status(
                 "status": "needs_action",
                 "description": "6-pack",
                 "due": "2024-02-01",
+                "priority": "Low",  # Added priority field
             },
         ),
     ],
@@ -600,3 +640,25 @@ async def test_subscribe(
     assert items[0]["summary"] == "Wine"
     assert items[0]["status"] == "needs_action"
     assert items[0]["uid"]
+
+
+@pytest.mark.parametrize(
+    ("priority", "expected"),
+    [
+        # Positive scenarios
+        (1, "Low"),
+        (2, "Medium"),
+        (3, "High"),
+        (4, "Urgent"),
+        # Negative / invalid scenarios
+        (0, "Unknown"),
+        (5, "Unknown"),
+        (-1, "Unknown"),
+        ("3", "Unknown"),
+        (None, "Unknown"),
+        (2.5, "Unknown"),
+    ],
+)
+def test_define_priority_level(priority, expected) -> None:
+    """Test that define_priority_level maps priorities to the expected labels."""
+    assert define_priority_level(priority) == expected

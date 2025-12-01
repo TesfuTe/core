@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime
+import logging
 from typing import Any, cast
 
 from todoist_api_python.models import Task
@@ -20,6 +21,8 @@ from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .coordinator import TodoistCoordinator
+
+LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -118,8 +121,13 @@ class TodoistTodoListEntity(CoordinatorEntity[TodoistCoordinator], TodoListEntit
                         status=status,
                         due=due,
                         description=task.description or None,  # Don't use empty string
+                        priority=define_priority_level(
+                            task.priority
+                        ),  # New field for priority
                     )
                 )
+                LOGGER.info("Task Priority: %s", task.priority)
+            LOGGER.info("TodoItem priority:%s", items)
             self._attr_todo_items = items
         super()._handle_coordinator_update()
 
@@ -163,3 +171,9 @@ class TodoistTodoListEntity(CoordinatorEntity[TodoistCoordinator], TodoListEntit
         """When entity is added to hass update state from existing coordinator data."""
         await super().async_added_to_hass()
         self._handle_coordinator_update()
+
+
+def define_priority_level(priority: int) -> str:
+    """Define priority level based on Todoist priority integer."""
+    priority_mapping = {1: "Low", 2: "Medium", 3: "High", 4: "Urgent"}
+    return priority_mapping.get(priority, "Unknown")

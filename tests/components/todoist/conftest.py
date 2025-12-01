@@ -49,6 +49,7 @@ def make_api_task(
     project_id: str | None = None,
     description: str | None = None,
     parent_id: str | None = None,
+    priority: int | None = None,
 ) -> Task:
     """Mock a todoist Task instance."""
     return Task(
