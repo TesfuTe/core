@@ -612,7 +612,7 @@ async def test_subscribe(
         blocking=True,
     )
 
-    # Verify update is published
+    # Verify update is published;
     msg = await client.receive_json()
     assert msg["id"] == subscription_id
     assert msg["type"] == "event"
